@@ -2,25 +2,31 @@ package com.faculdade.frau.b.Model.Avl;
 
 import java.util.ArrayList;
 
+
 public class Node<T extends Comparable<T>> {
     private T key;
     private Node<T> left;
     private Node<T> right;
     private int height;
-    private ArrayList<T> pointer;  
+    private ArrayList<Integer> pointer;
 
     public Node(T key) {
+        this.pointer = new ArrayList<>();
         this.key = key;
         this.left = null;
         this.right = null;
         this.height = 1; // Inicializa a altura do nó como 1
-        this.pointer = new ArrayList<>();
     }
 
     public T getKey() {
         return key;
     }
     public void setKey(T key) {
+        if (key instanceof String && ((String) key).isEmpty()) {
+            this.key = null; // Se a chave for 
+            
+        }
+
         this.key = key;
     }
     public Node<T> getLeft() {
@@ -41,23 +47,17 @@ public class Node<T extends Comparable<T>> {
     public void setHeight(int height) {
         this.height = height;
     }
-    public ArrayList<T> getPointer() {
+    public ArrayList<Integer> getPointer() {
         return pointer;
     }
-    public void setPointer(ArrayList<T> pointer) {
+    public void setPointer(ArrayList<Integer> pointer) {
         this.pointer = pointer;
     }
-    public void addPointer(T pointer) {
+    public void addPointer(int pointer) {
         this.pointer.add(pointer);
     }
-    public void removePointer(T pointer) {
-        this.pointer.remove(pointer);
-    }
-    public boolean containsPointer(T pointer) {
-        return this.pointer.contains(pointer);
-    }
-    public void clearPointer() {
-        this.pointer.clear();
+    public void removePointer(int pointer) {
+        this.pointer.remove(Integer.valueOf(pointer));
     }
 
 

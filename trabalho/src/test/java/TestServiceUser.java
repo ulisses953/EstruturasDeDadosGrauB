@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.faculdade.frau.b.service.ServiceUser;
 
-public class TesteServiceUser {
+public class TestServiceUser {
 
     /**
      * Testa o método getUserByFileCSV da classe ServiceUser

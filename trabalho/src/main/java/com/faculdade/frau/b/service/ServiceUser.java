@@ -2,7 +2,10 @@ package com.faculdade.frau.b.service;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
@@ -27,22 +30,28 @@ public class ServiceUser {
         try {
             CSVReader reader = new CSVReader(new FileReader(file));
             String[] line;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // ajuste o formato conforme seu CSV
             while ((line = reader.readNext()) != null) {
                 User user = new User();
                 user.setCpf(Long.parseLong(line[0]));
                 user.setRG(Long.parseLong(line[1]));
                 user.setName(line[2]);
-                user.setDateOfBirth(LocalDate.parse(line[3]));
-                user.setCity(line[4]);
 
-                // Adiciona o usuário à lista
+                // Conversão correta da data
+                Calendar cal = Calendar.getInstance();
+                Date date = sdf.parse(line[3]);
+                cal.setTime(date);
+                user.setDateOfBirth(cal);
+
+                user.setCity(line[4]);
+                
                 logger.info("Usuário lido do CSV: " + user);
                 users.add(user);
             }
             reader.close();
-        } catch (IOException | CsvException e) {
+        } catch (IOException | CsvException | ParseException e) {
             logger.error("Erro ao ler o arquivo CSV: " + e.getMessage());
-        }catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             logger.error("Erro ao converter dados do CSV: " + e.getMessage());
         }
 

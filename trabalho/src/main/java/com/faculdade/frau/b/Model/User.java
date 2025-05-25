@@ -1,15 +1,16 @@
 package com.faculdade.frau.b.Model;
 
 import java.time.LocalDate;
+import java.util.Calendar;
 
 public class User {
     private Long cpf;
     private Long RG;
     private String name;
-    private LocalDate dateOfBirth;
+    private Calendar dateOfBirth;
     private String city;
 
-    public User(Long cpf, Long RG, String name, LocalDate dateOfBirth, String city) {
+    public User(Long cpf, Long RG, String name, Calendar dateOfBirth, String city) {
         this.cpf = cpf;
         this.RG = RG;
         this.name = name;
@@ -38,10 +39,10 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
-    public LocalDate getDateOfBirth() {
+    public Calendar getDateOfBirth() {
         return dateOfBirth;
     }
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(Calendar dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
     public String getCity() {
