@@ -12,6 +12,15 @@ public class ServiceAVL<T extends Comparable<T>> {
     public Node<T> getRoot() {
         return root;
     }
+
+    public ServiceAVL(Node<T> root) {
+        this.root = root;
+    }
+
+    public ServiceAVL() {
+    }
+    
+
     /**
      * Insert a new node in the AVL tree
      * @param value 
@@ -45,15 +54,15 @@ public class ServiceAVL<T extends Comparable<T>> {
 
         // Verifica se o valor é uma instância de Calendar e, se sim, impede a inserção de datas iguais
         if (value instanceof Calendar) {
-            Calendar newCal = (Calendar) value;
+            Calendar newDate = (Calendar) value;
             if (root != null && root.getKey() instanceof Calendar) {
-            Calendar rootCal = (Calendar) root.getKey();
-            if (newCal.compareTo(rootCal) == 0) {
-                return root; // Não insere datas iguais
-            }
+                Calendar existingDate = (Calendar) root.getKey();
+                if (isSameDay(newDate, existingDate)) {
+                    return root; // Não insere datas iguais
+                }
             }
         }
-
+        
         
         if (value == null) {
             return root; // No value to insert
@@ -165,18 +174,49 @@ public class ServiceAVL<T extends Comparable<T>> {
         node.setHeight(Math.max(leftHeight, rightHeight) + 1);
     }
 
+    public Node<T> findNode(T value){
+        return findNodeRecursive(value, root);
+    }
+
+    protected Node<T> findNodeRecursive(T value, Node<T> node) {
+        if (node == null || value == null) {
+            return null;
+        }
+        if (value.compareTo(node.getKey()) < 0) {
+            return findNodeRecursive(value, node.getLeft());
+        } else if (value.compareTo(node.getKey()) > 0) {
+            return findNodeRecursive(value, node.getRight());
+        } else {
+            return node; // Found the node
+        }
+    }
+
     public int calculateBalanceFactor(Node<T> node) {
         if (node == null) return 0;
         return (node.getLeft() != null ? node.getLeft().getHeight() : 0) - (node.getRight() != null ? node.getRight().getHeight() : 0);
     }
 
-    public ServiceAVL(Node<T> root) {
-        this.root = root;
+    public static boolean isSameDay(Calendar c1, Calendar c2) {
+    if (c1 == null || c2 == null) return false;
+    return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
+        && c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
+        && c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH);
     }
 
-    public ServiceAVL() {
+    public Node<T> deleteNode(T value) {
+        root = deleteNodeRecursive(value, root);
+        return root;
     }
-    
 
-    
+    public Node<T> deleteNodeRecursive(T value, Node<T> node){
+        if (node == null) {
+            return null; 
+        }
+
+        
+        
+        
+        
+        return null; 
+    }
 }

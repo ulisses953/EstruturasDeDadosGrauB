@@ -60,5 +60,14 @@ public class Node<T extends Comparable<T>> {
         this.pointer.remove(Integer.valueOf(pointer));
     }
 
-
+    @Override
+    public String toString() {
+        return "Node{" +
+                "key=" + key +
+                ", left=" + left +
+                ", right=" + right +
+                ", height=" + height +
+                ", pointer=" + pointer +
+                '}';
+    }
 }

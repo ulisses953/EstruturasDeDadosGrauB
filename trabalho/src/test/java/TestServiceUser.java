@@ -4,10 +4,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.faculdade.frau.b.service.ServiceUser;
 
 public class TestServiceUser {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestServiceUser.class);
+
+    private final String path = "../main/resources/nomes.csv";
+
+        
+ 
 
     /**
      * Testa o método getUserByFileCSV da classe ServiceUser
@@ -98,7 +107,6 @@ public class TestServiceUser {
 
         assertEquals(2, count);
 
-        // Opcional: deletar o arquivo após o teste
         new java.io.File(testFile).delete();
     }
     

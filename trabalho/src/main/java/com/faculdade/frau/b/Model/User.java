@@ -1,6 +1,5 @@
 package com.faculdade.frau.b.Model;
 
-import java.time.LocalDate;
 import java.util.Calendar;
 
 public class User {

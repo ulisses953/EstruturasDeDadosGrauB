@@ -17,6 +17,8 @@ import com.opencsv.exceptions.CsvException;
 
 public class ServiceUser {
     private ArrayList<User> users = new ArrayList<>();
+    public ServiceAVL<Long> serviceAVLCPF = new ServiceAVL<>();
+    public ServiceAVL<Long> serviceAVLRG = new ServiceAVL<>();
     private static final Logger logger = LoggerFactory.getLogger(ServiceUser.class);
 
     /**
@@ -55,7 +57,21 @@ public class ServiceUser {
             logger.error("Erro ao converter dados do CSV: " + e.getMessage());
         }
 
+        insertAvlCPF();
+
+        logger.info("Total de usuários lidos: " + users.size());
         return users.size();
+    }
+
+    public void insertAvlCPF() {
+        for (int i = 0; i < users.size(); i++) {
+            serviceAVLCPF.insert(users.get(i).getCpf(), i);
+        }
+    }
+    public void insertAvlRG() {
+        for (int i = 0; i < users.size(); i++) {
+            serviceAVLCPF.insert(users.get(i).getRG(), i);
+        }
     }
     
     public ArrayList<User> getUsers() {
