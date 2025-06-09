@@ -133,6 +133,15 @@ public class TestServiceAVL {
         serviceAVLString.insert("banana", 1);
         serviceAVLString.insert("maçã", 2);
         serviceAVLString.insert("laranja", 3);
+        serviceAVLString.insert("abacaxi", 3);
+
+        logger.info("Raiz: " + serviceAVLString.getRoot().getKey());
+        logger.info("Esquerda: " + serviceAVLString.getRoot().getLeft().getKey());
+        logger.info("Direita: " + serviceAVLString.getRoot().getRight().getKey());
+        logger.info("Direita: " + serviceAVLString.getRoot().getLeft().getLeft().getKey());
+
+
+
 
         // Verifica se o nó foi inserido corretamente
         assertEquals("laranja", serviceAVLString.getRoot().getKey());
@@ -152,9 +161,11 @@ public class TestServiceAVL {
 
         serviceAVLString.insert("banana", 1);
         serviceAVLString.insert("maçã", 2);
-        serviceAVLString.insert("banana", 3); // Tentativa de inserir um valor igual
+        serviceAVLString.insert("banana", 3);
+         // Tentativa de inserir um valor igual
 
         // Verifica se o nó foi inserido corretamente
+
         assertEquals("banana", serviceAVLString.getRoot().getKey());
         assertEquals("maçã", serviceAVLString.getRoot().getRight().getKey());
     }

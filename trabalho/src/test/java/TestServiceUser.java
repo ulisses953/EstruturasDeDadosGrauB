@@ -35,7 +35,7 @@ public class TestServiceUser {
         writer.close();
 
         ServiceUser serviceUser = new ServiceUser();
-        int count = serviceUser.getUserByFileCSV(testFile);
+        int count = serviceUser.getUserByFileCSV(testFile, ',', false);
 
         assertEquals(2, count);
 
@@ -58,7 +58,7 @@ public class TestServiceUser {
         writer.close();
 
         ServiceUser serviceUser = new ServiceUser();
-        int count = serviceUser.getUserByFileCSV(testFile);
+        int count = serviceUser.getUserByFileCSV(testFile, ',', false);
 
         assertEquals(0, count);
 
@@ -78,7 +78,7 @@ public class TestServiceUser {
         String testFile = "test_not_found_users.csv";
 
         ServiceUser serviceUser = new ServiceUser();
-        int count = serviceUser.getUserByFileCSV(testFile);
+        int count = serviceUser.getUserByFileCSV(testFile, ',', false);
 
         assertEquals(0, count);
 
@@ -103,7 +103,7 @@ public class TestServiceUser {
         writer.close();
 
         ServiceUser serviceUser = new ServiceUser();
-        int count = serviceUser.getUserByFileCSV(testFile);
+        int count = serviceUser.getUserByFileCSV(testFile, ',', false);
 
         assertEquals(2, count);
 
