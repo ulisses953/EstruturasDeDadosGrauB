@@ -6,12 +6,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.faculdade.frau.b.Model.User;
+import com.faculdade.frau.b.Model.Avl.Node;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -20,22 +22,38 @@ import com.opencsv.exceptions.CsvException;
 public class ServiceUser {
     private ArrayList<User> users = new ArrayList<>();
 
-    public ServiceAVL<Long> serviceAVLCPF = new ServiceAVL<>();
-    public ServiceAVL<Long> serviceAVLRG = new ServiceAVL<>();
-    public ServiceAVL<Calendar> serviceAVLData = new ServiceAVL<>();
+    private ServiceAVL<Long> serviceAVLCPF = new ServiceAVL<>();
+    private ServiceAVL<Calendar> serviceAVLData = new ServiceAVL<>();
 
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceUser.class);
 
+
     /**
-     * Obtém varios usuário a partir de um arquivo CSV
-     * @param file caminho para o arquivo csv
-     * @return int quantidade de usuários obtidos
-     * @author Ulisses
-     * @since 1.0
+     * Reads users from a CSV file and adds them to the user list.
+     *
+     * <p>The CSV file must contain the following fields in each row:
+     * <ul>
+     *   <li>CPF (long)</li>
+     *   <li>RG (long)</li>
+     *   <li>Name (String)</li>
+     *   <li>Date of birth (String in the format "dd/MM/yyyy")</li>
+     *   <li>City (String)</li>
+     * </ul>
+     *
+     * @param file       Path to the CSV file.
+     * @param separator  Field separator in the CSV file. If '\0', ',' will be used.
+     * @param hasHeader  Indicates if the CSV file has a header row.
+     * @return           The number of users read and added to the list.
+     *
+     * @throws IllegalArgumentException If the file path is null or empty,
+     *                                  if the file is not a CSV, or does not exist.
+     * @throws IOException             If an error occurs while reading the file.
+     * @throws CsvException            If an error occurs while processing the CSV.
+     * @throws ParseException          If an error occurs while parsing the date of birth.
+     * @throws NumberFormatException   If an error occurs while parsing CPF or RG.
      */
     public int getUserByFileCSV(String file, char separator, boolean hasHeader) {
-
 
         if (file == null || file.isEmpty()) {
             logger.error("O caminho do arquivo CSV não pode ser nulo ou vazio.");
@@ -90,11 +108,17 @@ public class ServiceUser {
             logger.error("Erro ao converter dados do CSV: " + e.getMessage());
         }
 
+        insertDateAvl();
+
         logger.info("Total de usuários lidos: " + users.size());
         return users.size();
     }
 
-    public void insertAvlCPF() {
+    public void insertDateAvl(){
+        insertAvlCPF();
+    }
+
+    protected void insertAvlCPF() {
         for (int i = 0; i < users.size(); i++) {
             serviceAVLCPF.insert(users.get(i).getCpf(), i);
         }
@@ -102,6 +126,34 @@ public class ServiceUser {
 
     public ArrayList<User> getUsers() {
         return users;
+    }
+
+    public User getUserByCPF(Long cpf) {
+        if (cpf == null || cpf <= 0) {
+            logger.error("O CPF não pode ser nulo ou menor ou igual a zero.");
+            return null;
+        }
+        try {
+            Node<Long> node = serviceAVLCPF.findNode(cpf);
+            
+            if (node != null) {
+                int index = node.getPointer().get(0);
+
+                logger.info("Usuário encontrado com CPF: " + cpf);
+                logger.info("Usuário: " + users.get(index).toString());
+
+                return users.get(index);
+            } else {
+                logger.info("Usuário não encontrado com CPF: " + cpf);
+                return null;
+            }
+
+        } catch (NumberFormatException e) {
+            logger.error("CPF inválido: " + cpf);
+            return null;
+        }
+
+       
     }
 
     

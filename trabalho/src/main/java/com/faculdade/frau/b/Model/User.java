@@ -53,11 +53,18 @@ public class User {
 
     @Override
     public String toString() {
+        String dateStr = "";
+        if (dateOfBirth != null) {
+            int day = dateOfBirth.get(Calendar.DAY_OF_MONTH);
+            int month = dateOfBirth.get(Calendar.MONTH) + 1; // Calendar.MONTH is zero-based
+            int year = dateOfBirth.get(Calendar.YEAR);
+            dateStr = String.format("%02d/%02d/%04d", day, month, year);
+        }
         return "User{" +
                 "cpf=" + cpf +
                 ", RG=" + RG +
                 ", name='" + name + '\'' +
-                ", dateOfBirth=" + dateOfBirth +
+                ", dateOfBirth=" + dateStr +
                 ", city='" + city + '\'' +
                 '}';
     }
