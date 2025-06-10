@@ -1,4 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Calendar;
@@ -7,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.faculdade.frau.b.Model.Avl.Node;
 import com.faculdade.frau.b.service.ServiceAVL;
 
 public class TestServiceAVL {
@@ -602,6 +605,106 @@ public class TestServiceAVL {
         assertEquals(30, serviceAVLInteger.getRoot().getRight().getKey());
     }
 
-    
+
+    @Test
+    public void testFindNodeRecursive_LeftBranch() {
+        ServiceAVL<Integer> serviceAVL = new ServiceAVL<>();
+        serviceAVL.insert(20, 1);
+        serviceAVL.insert(10, 2); // Vai para a esquerda de 20
+        serviceAVL.insert(30, 3);
+
+        // Busca por um valor menor que a raiz (deve seguir para a esquerda)
+        assertEquals(10, serviceAVL.findNode(10).getKey());
+        // Busca por um valor não existente à esquerda (deve retornar null)
+        assertEquals(null, serviceAVL.findNode(5));
+    }
+
+    @Test
+    public void testFindMin_SingleNode() {
+        ServiceAVL<Integer> avl = new ServiceAVL<>();
+        Node<Integer> node = new Node<>(42);
+        assertSame(node, avl.findMin(node));
+    }
+
+    @Test
+    public void testFindMin_MultipleLeftNodes() {
+        ServiceAVL<Integer> avl = new ServiceAVL<>();
+        Node<Integer> root = new Node<>(50);
+        Node<Integer> left1 = new Node<>(30);
+        Node<Integer> left2 = new Node<>(10);
+        root.setLeft(left1);
+        left1.setLeft(left2);
+
+        assertSame(left2, avl.findMin(root));
+    }
+
+        @Test
+    public void testDeleteNode_LeafNode() {
+        ServiceAVL<Integer> avl = new ServiceAVL<>();
+        avl.insert(20, 1);
+        avl.insert(10, 2);
+        avl.insert(30, 3);
+
+        // Remove nó folha (30)
+        avl.deleteNode(30);
+        assertEquals(20, avl.getRoot().getKey());
+        assertEquals(10, avl.getRoot().getLeft().getKey());
+        assertNull(avl.getRoot().getRight());
+    }
+
+    @Test
+    public void testDeleteNode_OneChild() {
+        ServiceAVL<Integer> avl = new ServiceAVL<>();
+        avl.insert(20, 1);
+        avl.insert(10, 2);
+        avl.insert(5, 3);
+
+        // Remove nó com um filho (10)
+        avl.deleteNode(10);
+        assertEquals(5, avl.getRoot().getKey());
+        assertEquals(20, avl.getRoot().getRight().getKey());
+        assertNull(avl.getRoot().getRight().getRight());
+    }
+
+    @Test
+    public void testDeleteNode_TwoChildren() {
+        ServiceAVL<Integer> avl = new ServiceAVL<>();
+        avl.insert(20, 1);
+        avl.insert(10, 2);
+        avl.insert(30, 3);
+        avl.insert(25, 4);
+        avl.insert(40, 5);
+
+        logger.info("Raiz: " + avl.getRoot().getKey());
+        logger.info("Esquerda: " + avl.getRoot().getLeft().getKey());
+        logger.info("Direita: " + avl.getRoot().getRight().getKey());
+        logger.info("Direita: " + avl.getRoot().getRight().getLeft().getKey());
+        logger.info("Direita: " + avl.getRoot().getRight().getRight().getKey());
+
+        // Remove nó com dois filhos (30)
+        avl.deleteNode(30);
+        assertEquals(20, avl.getRoot().getKey());
+        assertEquals(25, avl.getRoot().getRight().getKey()); // 25 é o sucessor em ordem
+        assertEquals(40, avl.getRoot().getRight().getRight().getKey());
+    }
+
+    @Test
+    public void testDeleteNode_NotFound() {
+        ServiceAVL<Integer> avl = new ServiceAVL<>();
+        avl.insert(20, 1);
+        avl.insert(10, 2);
+
+        // Remove valor não existente (99)
+        avl.deleteNode(99);
+        assertEquals(20, avl.getRoot().getKey());
+        assertEquals(10, avl.getRoot().getLeft().getKey());
+    }
+
+    @Test
+    public void testDeleteNode_NullRoot() {
+        ServiceAVL<Integer> avl = new ServiceAVL<>();
+        // Remove de árvore vazia
+        assertNull(avl.deleteNode(10));
+    }
 
 }

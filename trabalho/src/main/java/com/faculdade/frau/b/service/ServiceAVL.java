@@ -213,11 +213,76 @@ public class ServiceAVL<T extends Comparable<T>> {
             return null; 
         }
         
+    if (value.compareTo(node.getKey()) < 0) {
+            node.setLeft(deleteNodeRecursive(value, node.getLeft()));
+        } else if (value.compareTo(node.getKey()) > 0) {
+            node.setRight(deleteNodeRecursive(value, node.getRight()));
+        } else {
+            // Node with only one child or no child
+            if (node.getLeft() == null) {
+                return node.getRight();
+            } else if (node.getRight() == null) {
+                return node.getLeft();
+            }
 
-        
-        
-        
-        
-        return null; 
+            
+            Node<T> temp = findMax(node.getLeft());
+            node.setKey(temp.getKey());
+            node.setLeft(deleteNodeRecursive(temp.getKey(), node.getLeft()));
+        }
+        // Update height of the current node
+
+        updateHeight(node);
+
+        // Check balance factor
+
+        int balance = calculateBalanceFactor(node);
+        int balanceLeft = (node.getLeft() != null) ? calculateBalanceFactor(node.getLeft()) : 0;
+        int balanceRight = (node.getRight() != null) ? calculateBalanceFactor(node.getRight()) : 0;
+
+        // Left-Left (LL) Case
+        if (balance > 1 && balanceLeft >= 0) {
+            return rotateRight(node);
+        }
+        // Left-Right (LR) Case
+        if (balance > 1 && balanceLeft < 0) {
+            node.setLeft(rotateLeft(node.getLeft()));
+            return rotateRight(node);
+        }
+        // Right-Right (RR) Case
+        if (balance < -1 && balanceRight <= 0) {
+            return rotateLeft(node);
+        }
+        // Right-Left (RL) Case
+        if (balance < -1 && balanceRight > 0) {
+            node.setRight(rotateRight(node.getRight()));
+            return rotateLeft(node);
+        }
+        return node; 
+
     }
+
+    private Node<T> findMax(Node<T> left) {
+        Node<T> current = left;
+        while (current.getRight() != null) {
+            current = current.getRight();
+        }
+        return current;
+    }
+
+    public Node<T> findMin(Node<T> right) {
+        Node<T> current = right;
+        while (current.getLeft() != null) {
+            current = current.getLeft();
+        }
+        return current;
+    }
+
+    public void printTree(Node<Integer> node, String prefix) {
+    if (node != null) {
+        System.out.println(prefix + node.getKey());
+        printTree(node.getLeft(), prefix + "L-");
+        printTree(node.getRight(), prefix + "R-");
+    }
+}
 }

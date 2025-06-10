@@ -28,10 +28,12 @@ public class TestServiceUser {
     @Test
     public void testGetUserByFileCSV() throws IOException {
         // Cria um arquivo CSV temporário para teste
+        logger.info("Iniciando teste getUserByFileCSV");
+
         String testFile = "test_users.csv";
         FileWriter writer = new FileWriter(testFile);
-        writer.write("12345678900,1234567,Joao,2000-01-01,Sao Paulo\n");
-        writer.write("98765432100,7654321,Maria,1995-05-10,Rio de Janeiro\n");
+        writer.write("12345678900,1234567,Joao,2000/01/01,Sao Paulo\n");
+        writer.write("98765432100,7654321,Maria,1995/05/10,Rio de Janeiro\n");
         writer.close();
 
         ServiceUser serviceUser = new ServiceUser();
@@ -97,8 +99,8 @@ public class TestServiceUser {
         // Cria um arquivo CSV temporário para teste
         String testFile = "test_invalid_users.csv";
         FileWriter writer = new FileWriter(testFile);
-        writer.write("12345678900,1234567,Joao,2000-01-01,Sao Paulo\n");
-        writer.write("98765432100,7654321,Maria,1995-05-10,Rio de Janeiro\n");
+        writer.write("12345678900,1234567,Joao,2000/01/01,Sao Paulo\n");
+        writer.write("98765432100,7654321,Maria,1995/05/10,Rio de Janeiro\n");
         writer.write("invalid_line\n");
         writer.close();
 
