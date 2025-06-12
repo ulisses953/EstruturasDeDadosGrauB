@@ -24,35 +24,18 @@ public class ServiceUser {
 
     private ServiceAVL<Long> serviceAVLCPF = new ServiceAVL<>();
     private ServiceAVL<Calendar> serviceAVLData = new ServiceAVL<>();
-
+    private ServiceAVL<String> serviceAVLName = new ServiceAVL<>();
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceUser.class);
 
+    public ArrayList<User> getUsers() {
+        return users;
+    }
 
-    /**
-     * Reads users from a CSV file and adds them to the user list.
-     *
-     * <p>The CSV file must contain the following fields in each row:
-     * <ul>
-     *   <li>CPF (long)</li>
-     *   <li>RG (long)</li>
-     *   <li>Name (String)</li>
-     *   <li>Date of birth (String in the format "dd/MM/yyyy")</li>
-     *   <li>City (String)</li>
-     * </ul>
-     *
-     * @param file       Path to the CSV file.
-     * @param separator  Field separator in the CSV file. If '\0', ',' will be used.
-     * @param hasHeader  Indicates if the CSV file has a header row.
-     * @return           The number of users read and added to the list.
-     *
-     * @throws IllegalArgumentException If the file path is null or empty,
-     *                                  if the file is not a CSV, or does not exist.
-     * @throws IOException             If an error occurs while reading the file.
-     * @throws CsvException            If an error occurs while processing the CSV.
-     * @throws ParseException          If an error occurs while parsing the date of birth.
-     * @throws NumberFormatException   If an error occurs while parsing CPF or RG.
-     */
+    public void setUsers(ArrayList<User> users) {
+        this.users = users;
+    }
+
     public int getUserByFileCSV(String file, char separator, boolean hasHeader) {
 
         if (file == null || file.isEmpty()) {
@@ -60,7 +43,7 @@ public class ServiceUser {
             return 0;
         }
         if (separator == '\0') {
-            separator = ','; 
+            separator = ',';
         }
         if (!file.endsWith(".csv")) {
             logger.error("O arquivo deve ser um arquivo CSV.");
@@ -72,10 +55,9 @@ public class ServiceUser {
         }
         users.clear();
 
-
         try {
             CSVReader reader = new CSVReaderBuilder(new FileReader(file))
-            .withCSVParser(new CSVParserBuilder().withSeparator(separator).build()).build();
+                    .withCSVParser(new CSVParserBuilder().withSeparator(separator).build()).build();
 
             if (hasHeader) {
                 reader.readNext();
@@ -85,7 +67,7 @@ public class ServiceUser {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); // ajuste o formato conforme seu CSV
             while ((line = reader.readNext()) != null) {
                 User user = new User();
-               
+
                 user.setCpf(Long.parseLong(line[0]));
                 user.setRG(Long.parseLong(line[1]));
                 user.setName(line[2]);
@@ -97,7 +79,7 @@ public class ServiceUser {
                 user.setDateOfBirth(cal);
 
                 user.setCity(line[4]);
-                
+
                 logger.info("Usuário lido do CSV: " + user);
                 users.add(user);
             }
@@ -108,24 +90,35 @@ public class ServiceUser {
             logger.error("Erro ao converter dados do CSV: " + e.getMessage());
         }
 
-        insertDateAvl();
-
         logger.info("Total de usuários lidos: " + users.size());
         return users.size();
     }
 
-    public void insertDateAvl(){
+    public void insertDateAvl() {
+        logger.info("Inserindo usuários no AVL por CPF");
         insertAvlCPF();
+        logger.info("Inserindo usuários no AVL por Data de Nascimento");
+        InsertAvlData();
     }
 
-    protected void insertAvlCPF() {
+    public void insertAvlCPF() {
         for (int i = 0; i < users.size(); i++) {
             serviceAVLCPF.insert(users.get(i).getCpf(), i);
         }
     }
 
-    public ArrayList<User> getUsers() {
-        return users;
+    public void InsertAvlData() {
+        for (int i = 0; i < users.size(); i++) {
+            Calendar data = users.get(i).getDateOfBirth();
+            zerarHora(data);
+            serviceAVLData.insert(data, i);
+        }
+    }
+
+    public void InsertAvlName() {
+        for (int i = 0; i < users.size(); i++) {
+            serviceAVLName.insert(users.get(i).getName(), i);
+        }
     }
 
     public User getUserByCPF(Long cpf) {
@@ -135,7 +128,7 @@ public class ServiceUser {
         }
         try {
             Node<Long> node = serviceAVLCPF.findNode(cpf);
-            
+
             if (node != null) {
                 int index = node.getPointer().get(0);
 
@@ -153,10 +146,95 @@ public class ServiceUser {
             return null;
         }
 
-       
     }
 
-    
-    
+    public List<User> getUserByDate(Calendar date1, Calendar date2) {
+        zerarHora(date1);
+        zerarHora(date2);
 
+        List<Calendar> dates = getAllDatesBetween(date1, date2);
+        List<User> usersFound = new ArrayList<>();
+        if (dates.isEmpty()) {
+            logger.info("Nenhuma data válida encontrada entre as datas fornecidas.");
+            return usersFound;
+        }
+        for (Calendar date : dates) {
+            Node<Calendar> node = serviceAVLData.findNode(date);
+            if (node != null) {
+                for (Integer index : node.getPointer()) {
+                    usersFound.add(users.get(index));
+                }
+            }
+        }
+
+        if (usersFound.isEmpty()) {
+            logger.info("Nenhum usuário encontrado entre as datas fornecidas.");
+        } else {
+            logger.info("Usuários encontrados entre as datas fornecidas: " + usersFound.size());
+        }
+
+        for (User user : usersFound) {
+            logger.info("Usuário encontrado: " + user.toString());
+        }
+
+        return usersFound;
+    }
+
+    public List<Calendar> getAllDatesBetween(Calendar date1, Calendar date2) {
+        List<Calendar> dates = new ArrayList<>();
+        if (date1 == null || date2 == null || date1.after(date2)) {
+            return dates;
+        }
+
+        Calendar current = (Calendar) date1.clone();
+
+        while (!current.after(date2)) {
+            dates.add((Calendar) current.clone());
+            current.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return dates;
+    }
+
+    public List<User> getUserByName(String name) {
+        if (name == null || name.isEmpty()) {
+            logger.error("O nome não pode ser nulo ou vazio.");
+            return new ArrayList<>();
+        }
+
+        List<User> usersFound = new ArrayList<>();
+        collectUsersByNamePrefix(serviceAVLName.getRoot(), name.toLowerCase(), usersFound);
+
+        if (usersFound.isEmpty()) {
+            logger.info("Nenhum usuário encontrado com o nome: " + name);
+        } else {
+            logger.info("Usuários encontrados com o nome: " + name);
+        }
+
+        return usersFound;
+    }
+
+    private void collectUsersByNamePrefix(Node<String> node, String prefix, List<User> usersFound) {
+        if (node == null)
+            return;
+
+        String nodeName = node.getKey();
+        System.out.println("Verificando nó: " + nodeName);
+        if (nodeName != null && nodeName.toLowerCase().startsWith(prefix)) {
+            for (Integer index : node.getPointer()) {
+                usersFound.add(users.get(index));
+            }
+        }
+
+        collectUsersByNamePrefix(node.getLeft(), prefix, usersFound);
+        collectUsersByNamePrefix(node.getRight(), prefix, usersFound);
+    }
+
+    public void zerarHora(Calendar cal) {
+    if (cal != null) {
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+    }
+}
 }

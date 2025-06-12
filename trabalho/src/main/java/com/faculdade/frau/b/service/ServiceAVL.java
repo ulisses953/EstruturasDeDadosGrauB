@@ -19,12 +19,12 @@ public class ServiceAVL<T extends Comparable<T>> {
 
     public ServiceAVL() {
     }
-    
 
     /**
      * Insert a new node in the AVL tree
-     * @param value 
-     * @param pointer 
+     * 
+     * @param value
+     * @param pointer
      * @return
      * @author Ulisses
      */
@@ -39,10 +39,11 @@ public class ServiceAVL<T extends Comparable<T>> {
 
     /**
      * Recursive method to insert a new node in the AVL tree
-     * @param value 
-     * @param root 
-     * @param pointer 
-     * @return 
+     * 
+     * @param value
+     * @param root
+     * @param pointer
+     * @return
      * @Author Ulisses
      */
     protected Node<T> insertRecursive(T value, Node<T> root, List<Integer> pointer) {
@@ -52,18 +53,21 @@ public class ServiceAVL<T extends Comparable<T>> {
             return root;
         }
 
-        // Verifica se o valor é uma instância de Calendar e, se sim, impede a inserção de datas iguais
+        // Verifica se o valor é uma instância de Calendar e, se sim, impede a inserção
+        // de datas iguais
         if (value instanceof Calendar) {
             Calendar newDate = (Calendar) value;
             if (root != null && root.getKey() instanceof Calendar) {
                 Calendar existingDate = (Calendar) root.getKey();
                 if (isSameDay(newDate, existingDate)) {
-                    return root; // Não insere datas iguais
+                    for (int p : pointer) {
+                        root.addPointer(p);
+                    }
+                    return root;
                 }
             }
         }
-        
-        
+
         if (value == null) {
             return root; // No value to insert
         }
@@ -116,9 +120,10 @@ public class ServiceAVL<T extends Comparable<T>> {
 
         return root;
     }
-    
+
     /**
      * Performs a left rotation on the given node.
+     * 
      * @param root The root node to rotate.
      * @return The new root after rotation.
      */
@@ -144,6 +149,7 @@ public class ServiceAVL<T extends Comparable<T>> {
 
     /**
      * Performs a right rotation on the given node.
+     * 
      * @param root The root node to rotate.
      * @return The new root after rotation.
      */
@@ -167,14 +173,15 @@ public class ServiceAVL<T extends Comparable<T>> {
         return newRoot;
     }
 
-    protected void updateHeight(Node<T> node){
-        if (node == null) return;
+    protected void updateHeight(Node<T> node) {
+        if (node == null)
+            return;
         int leftHeight = (node.getLeft() != null) ? node.getLeft().getHeight() : 0;
         int rightHeight = (node.getRight() != null) ? node.getRight().getHeight() : 0;
         node.setHeight(Math.max(leftHeight, rightHeight) + 1);
     }
 
-    public Node<T> findNode(T value){
+    public Node<T> findNode(T value) {
         return findNodeRecursive(value, root);
     }
 
@@ -192,15 +199,18 @@ public class ServiceAVL<T extends Comparable<T>> {
     }
 
     public int calculateBalanceFactor(Node<T> node) {
-        if (node == null) return 0;
-        return (node.getLeft() != null ? node.getLeft().getHeight() : 0) - (node.getRight() != null ? node.getRight().getHeight() : 0);
+        if (node == null)
+            return 0;
+        return (node.getLeft() != null ? node.getLeft().getHeight() : 0)
+                - (node.getRight() != null ? node.getRight().getHeight() : 0);
     }
 
     public static boolean isSameDay(Calendar c1, Calendar c2) {
-    if (c1 == null || c2 == null) return false;
-    return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
-        && c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
-        && c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH);
+        if (c1 == null || c2 == null)
+            return false;
+        return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
+                && c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
+                && c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH);
     }
 
     public Node<T> deleteNode(T value) {
@@ -208,12 +218,12 @@ public class ServiceAVL<T extends Comparable<T>> {
         return root;
     }
 
-    public Node<T> deleteNodeRecursive(T value, Node<T> node){
+    public Node<T> deleteNodeRecursive(T value, Node<T> node) {
         if (node == null) {
-            return null; 
+            return null;
         }
-        
-    if (value.compareTo(node.getKey()) < 0) {
+
+        if (value.compareTo(node.getKey()) < 0) {
             node.setLeft(deleteNodeRecursive(value, node.getLeft()));
         } else if (value.compareTo(node.getKey()) > 0) {
             node.setRight(deleteNodeRecursive(value, node.getRight()));
@@ -225,7 +235,6 @@ public class ServiceAVL<T extends Comparable<T>> {
                 return node.getLeft();
             }
 
-            
             Node<T> temp = findMax(node.getLeft());
             node.setKey(temp.getKey());
             node.setLeft(deleteNodeRecursive(temp.getKey(), node.getLeft()));
@@ -258,7 +267,7 @@ public class ServiceAVL<T extends Comparable<T>> {
             node.setRight(rotateRight(node.getRight()));
             return rotateLeft(node);
         }
-        return node; 
+        return node;
 
     }
 
@@ -278,11 +287,4 @@ public class ServiceAVL<T extends Comparable<T>> {
         return current;
     }
 
-    public void printTree(Node<Integer> node, String prefix) {
-    if (node != null) {
-        System.out.println(prefix + node.getKey());
-        printTree(node.getLeft(), prefix + "L-");
-        printTree(node.getRight(), prefix + "R-");
-    }
-}
 }

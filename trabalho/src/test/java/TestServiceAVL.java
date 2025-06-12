@@ -1,7 +1,9 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Calendar;
 
@@ -707,4 +709,28 @@ public class TestServiceAVL {
         assertNull(avl.deleteNode(10));
     }
 
+    @Test
+    public void testInsertCalendar_DatasIguaisAdicionaDoisPonteiros() {
+        ServiceAVL<Calendar> avl = new ServiceAVL<>();
+
+        Calendar date1 = Calendar.getInstance();
+        date1.set(2023, Calendar.JANUARY, 1);
+
+        Calendar date2 = Calendar.getInstance();
+        date2.set(2023, Calendar.JANUARY, 1); // mesma data de date1
+
+        avl.insert(date1, 1);
+        avl.insert(date2, 2);
+
+        Node<Calendar> node = avl.findNode(date1);
+
+        // O nó deve existir e conter os dois ponteiros
+        assertNotNull(node);
+        assertEquals(2, node.getPointer().size());
+        assertTrue(node.getPointer().contains(1));
+        assertTrue(node.getPointer().contains(2));
+        // Não deve haver nó à direita nem à esquerda
+        assertNull(avl.getRoot().getLeft());
+        assertNull(avl.getRoot().getRight());
+    }
 }
