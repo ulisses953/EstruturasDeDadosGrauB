@@ -1,8 +1,10 @@
 package com.faculdade.frau.b.Gui;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Scanner;
 
+import com.faculdade.frau.b.DTO.DtoUserHeight;
 import com.faculdade.frau.b.service.ServiceUser;
 
 public class GUITerminal {
@@ -14,14 +16,14 @@ public class GUITerminal {
         Scanner scanner = new Scanner(System.in);
         int opcao = -1;
 
-        while (opcao != 8) {
+        while (opcao != 4) {
             System.out.println("======================================");
             System.out.println("     Estruturas - Trabalho Grau B     ");
             System.out.println("======================================");
             System.out.println("1. Pesquisar por CPF");
             System.out.println("2. Pesquisar por Data de Nascimento");
             System.out.println("3. Pesquisar por Nome");
-            System.out.println("8. Sair");
+            System.out.println("4. Sair");
             System.out.print("Selecione uma opção: ");
 
             try {
@@ -37,16 +39,19 @@ public class GUITerminal {
 
                     if (cpf.isEmpty()) {
                         System.out.println("CPF não pode ser vazio.");
-                    } else {
-                        var user = serviceUser.getUserByCPF(Long.parseLong(cpf));
-                        if (user != null) {
-                            System.out.println("Usuário encontrado: " + user.user().toString());
-                            System.out.println("Usuário Altura: " + user.height());
-
-                        } else {
-                            System.out.println("Usuário não encontrado.");
-                        }
+                        break;
                     }
+
+                    var resultCPF = serviceUser.getUserByCPF(Long.parseLong(cpf));
+
+                    if (resultCPF == null) {
+                        System.out.println("Usuário não encontrado.");
+                        break;
+                    }
+
+                    System.out.println("Usuário: " + resultCPF.user().toString());
+                    System.out.println("Altura do node: " + resultCPF.height());
+
                     break;
                 case 2:
                     System.out.println("Digite a data de nascimento para pesquisa (formato: dd/MM/yyyy): ");
@@ -66,32 +71,55 @@ public class GUITerminal {
                     Calendar data = stringToCalendar(dataNascimento);
                     Calendar data2 = stringToCalendar(dataNascimento2);
 
-                    if ((data != null) || (data2 != null)) {
-                        serviceUser.getUserByDate(data, data2).forEach(dto -> {
-                            System.out.println("Usuário : " + dto.user().toString());
-                            System.out.println("Altura do node: " + dto.height());
-
-                        });
+                    if ((data == null) || (data2 == null)) {
+                        break;
                     }
+
+                    List<DtoUserHeight> resultDate = serviceUser.getUserByDate(data, data2);
+
+                    if (resultDate.isEmpty()) {
+                        System.out.println("Nenhum usuário encontrado com essa data de nascimento.");
+                        break;
+                    }
+
+                    System.out.println("Total de usuários encontrados: " + resultDate.size());
+
+                    resultDate.forEach(dto -> {
+                        System.out.println("Usuário: " + dto.user().toString());
+                        System.out.println("Altura do node: " + dto.height());
+                    });
 
                     break;
                 case 3:
                     System.out.println("Digite o nome para pesquisa: ");
                     String name = scanner.nextLine();
+
                     if (name.isEmpty()) {
                         System.out.println("Nome não pode ser vazio.");
-                    } else {
-                        var Dto = serviceUser.getUserByName(name);
-                        if (Dto != null && !Dto.isEmpty()) {
-                            System.out.println("Usuários encontrados: ");
-                            for (var Dtos : Dto) {
-                                System.out.println("Usuário : " + Dtos.user().toString());
-                                System.out.println("Altura do node: " + Dtos.height());
-                            }
-                        } else {
-                            System.out.println("Nenhum usuário encontrado com esse nome.");
-                        }
+                        break;
                     }
+
+                    List<DtoUserHeight> resultName = serviceUser.getUserByName(name);
+
+                    if (resultName == null && resultName.isEmpty()) {
+                        System.out.println("Nenhum usuário encontrado com esse nome.");
+                        break;
+                    }
+
+                    System.out.println("Usuários encontrados: ");
+
+                    System.out.println("Total de usuários encontrados: " + resultName.size());
+
+                    resultName.forEach(dto -> {
+                        System.out.println("Usuário: " + dto.user().toString());
+                        System.out.println("Altura do node: " + dto.height());
+                    });
+
+                    break;
+
+                case 4:
+                    System.out.println("Saindo do programa...");
+                    opcao = 4; // Sair do loop
                     break;
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
@@ -99,6 +127,7 @@ public class GUITerminal {
             System.out.println();
         }
         scanner.close();
+
     }
 
     public Calendar stringToCalendar(String dataStr) {
