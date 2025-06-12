@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.faculdade.frau.b.Model.Avl.Node;
 
 public class ServiceAVL<T extends Comparable<T>> {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceAVL.class);
+
     private Node<T> root;
 
     public Node<T> getRoot() {
@@ -118,6 +123,8 @@ public class ServiceAVL<T extends Comparable<T>> {
             return rotateLeft(root);
         }
 
+        updateAllHeights();
+
         return root;
     }
 
@@ -178,7 +185,8 @@ public class ServiceAVL<T extends Comparable<T>> {
             return;
         int leftHeight = (node.getLeft() != null) ? node.getLeft().getHeight() : 0;
         int rightHeight = (node.getRight() != null) ? node.getRight().getHeight() : 0;
-        node.setHeight(Math.max(leftHeight, rightHeight) + 1);
+        node.setHeight(Math.max(leftHeight, rightHeight)+1);
+
     }
 
     public Node<T> findNode(T value) {
@@ -285,6 +293,18 @@ public class ServiceAVL<T extends Comparable<T>> {
             current = current.getLeft();
         }
         return current;
+    }
+
+    public void updateAllHeights() {
+        updateAllHeightsRecursive(root);
+    }
+
+    private void updateAllHeightsRecursive(Node<T> node) {
+        if (node == null)
+            return;
+        updateAllHeightsRecursive(node.getLeft());
+        updateAllHeightsRecursive(node.getRight());
+        updateHeight(node);
     }
 
 }

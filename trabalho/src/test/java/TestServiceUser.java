@@ -1,4 +1,5 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileWriter;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.faculdade.frau.b.Model.User;
+import com.faculdade.frau.b.Model.Avl.Node;
+import com.faculdade.frau.b.service.ServiceAVL;
 import com.faculdade.frau.b.service.ServiceUser;
 
 public class TestServiceUser {
@@ -222,6 +225,29 @@ public class TestServiceUser {
         assertEquals(29, result.get(result.size() - 1).get(Calendar.DAY_OF_MONTH), "Último dia deve ser 29/05/2001");
         assertEquals(Calendar.MAY, result.get(result.size() - 1).get(Calendar.MONTH), "Último mês deve ser Maio");
         assertEquals(2001, result.get(result.size() - 1).get(Calendar.YEAR), "Último ano deve ser 2001");   
+    }
+
+    @Test
+    public void testInsertCalendar_DatasIguaisAcumulaPonteiros() {
+        ServiceAVL<Calendar> avl = new ServiceAVL<>();
+
+        Calendar data1 = Calendar.getInstance();
+        data1.set(2023, Calendar.NOVEMBER, 30, 0, 0, 0);
+        data1.set(Calendar.MILLISECOND, 0);
+
+        Calendar data2 = Calendar.getInstance();
+        data2.set(2023, Calendar.NOVEMBER, 30, 12, 30, 45); // mesma data, hora diferente
+        data2.set(Calendar.MILLISECOND, 0);
+
+        avl.insert(data1, 1);
+        avl.insert(data2, 2);
+
+        Node<Calendar> node = avl.findNode(data1);
+
+        assertNotNull(node, "O nó da data deve existir");
+        assertEquals(2, node.getPointer().size(), "Deve haver dois ponteiros para a mesma data");
+        assertTrue(node.getPointer().contains(1), "Deve conter o ponteiro 1");
+        assertTrue(node.getPointer().contains(2), "Deve conter o ponteiro 2");
     }
 
 }

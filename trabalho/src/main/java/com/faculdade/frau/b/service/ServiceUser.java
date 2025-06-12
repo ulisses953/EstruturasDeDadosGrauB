@@ -4,14 +4,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.faculdade.frau.b.DTO.DtoUserHeight;
 import com.faculdade.frau.b.Model.User;
 import com.faculdade.frau.b.Model.Avl.Node;
 import com.opencsv.CSVParserBuilder;
@@ -99,6 +100,8 @@ public class ServiceUser {
         insertAvlCPF();
         logger.info("Inserindo usuários no AVL por Data de Nascimento");
         InsertAvlData();
+        logger.info("Inserindo usuários no AVL por Nome");
+        InsertAvlName();
     }
 
     public void insertAvlCPF() {
@@ -121,7 +124,7 @@ public class ServiceUser {
         }
     }
 
-    public User getUserByCPF(Long cpf) {
+    public DtoUserHeight getUserByCPF(Long cpf) {
         if (cpf == null || cpf <= 0) {
             logger.error("O CPF não pode ser nulo ou menor ou igual a zero.");
             return null;
@@ -135,7 +138,8 @@ public class ServiceUser {
                 logger.info("Usuário encontrado com CPF: " + cpf);
                 logger.info("Usuário: " + users.get(index).toString());
 
-                return users.get(index);
+                return new DtoUserHeight(users.get(index), node.getHeight());
+
             } else {
                 logger.info("Usuário não encontrado com CPF: " + cpf);
                 return null;
@@ -148,12 +152,12 @@ public class ServiceUser {
 
     }
 
-    public List<User> getUserByDate(Calendar date1, Calendar date2) {
+    public List<DtoUserHeight> getUserByDate(Calendar date1, Calendar date2) {
         zerarHora(date1);
         zerarHora(date2);
 
         List<Calendar> dates = getAllDatesBetween(date1, date2);
-        List<User> usersFound = new ArrayList<>();
+        List<DtoUserHeight> usersFound = new ArrayList<>();
         if (dates.isEmpty()) {
             logger.info("Nenhuma data válida encontrada entre as datas fornecidas.");
             return usersFound;
@@ -162,7 +166,7 @@ public class ServiceUser {
             Node<Calendar> node = serviceAVLData.findNode(date);
             if (node != null) {
                 for (Integer index : node.getPointer()) {
-                    usersFound.add(users.get(index));
+                    usersFound.add(new DtoUserHeight(users.get(index), node.getHeight()));
                 }
             }
         }
@@ -172,11 +176,8 @@ public class ServiceUser {
         } else {
             logger.info("Usuários encontrados entre as datas fornecidas: " + usersFound.size());
         }
-
-        for (User user : usersFound) {
-            logger.info("Usuário encontrado: " + user.toString());
-        }
-
+        
+        printAvlNameTree();
         return usersFound;
     }
 
@@ -195,13 +196,13 @@ public class ServiceUser {
         return dates;
     }
 
-    public List<User> getUserByName(String name) {
+    public List<DtoUserHeight> getUserByName(String name) {
         if (name == null || name.isEmpty()) {
             logger.error("O nome não pode ser nulo ou vazio.");
             return new ArrayList<>();
         }
 
-        List<User> usersFound = new ArrayList<>();
+        List<DtoUserHeight> usersFound = new ArrayList<>();
         collectUsersByNamePrefix(serviceAVLName.getRoot(), name.toLowerCase(), usersFound);
 
         if (usersFound.isEmpty()) {
@@ -213,15 +214,14 @@ public class ServiceUser {
         return usersFound;
     }
 
-    private void collectUsersByNamePrefix(Node<String> node, String prefix, List<User> usersFound) {
+    private void collectUsersByNamePrefix(Node<String> node, String prefix, List<DtoUserHeight> usersFound) {
         if (node == null)
             return;
 
         String nodeName = node.getKey();
-        System.out.println("Verificando nó: " + nodeName);
         if (nodeName != null && nodeName.toLowerCase().startsWith(prefix)) {
             for (Integer index : node.getPointer()) {
-                usersFound.add(users.get(index));
+                usersFound.add(new DtoUserHeight(users.get(index), node.getHeight()));
             }
         }
 
@@ -230,11 +230,32 @@ public class ServiceUser {
     }
 
     public void zerarHora(Calendar cal) {
-    if (cal != null) {
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        if (cal != null) {
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+        }
     }
-}
+
+    public void printAvlNameTree() {
+        printAvlNameRecursive(serviceAVLName.getRoot(), "", true);
+    }
+
+    private void printAvlNameRecursive(Node<String> node, String prefix, boolean isTail) {
+        if (node == null)
+            return;
+
+        System.out.println(prefix + (isTail ? "└── " : "├── ") + node.getKey());
+
+        List<Node<String>> children = new ArrayList<>();
+        if (node.getLeft() != null)
+            children.add(node.getLeft());
+        if (node.getRight() != null)
+            children.add(node.getRight());
+
+        for (int i = 0; i < children.size(); i++) {
+            printAvlNameRecursive(children.get(i), prefix + (isTail ? "    " : "│   "), i == children.size() - 1);
+        }
+    }
 }

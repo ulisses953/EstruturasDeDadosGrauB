@@ -40,7 +40,9 @@ public class GUITerminal {
                     } else {
                         var user = serviceUser.getUserByCPF(Long.parseLong(cpf));
                         if (user != null) {
-                            System.out.println("Usuário encontrado: " + user.toString());
+                            System.out.println("Usuário encontrado: " + user.user().toString());
+                            System.out.println("Usuário Altura: " + user.height());
+
                         } else {
                             System.out.println("Usuário não encontrado.");
                         }
@@ -65,8 +67,10 @@ public class GUITerminal {
                     Calendar data2 = stringToCalendar(dataNascimento2);
 
                     if ((data != null) || (data2 != null)) {
-                        serviceUser.getUserByDate(data, data2).forEach(user -> {
-                            System.out.println("Usuário encontrado: " + user.toString());
+                        serviceUser.getUserByDate(data, data2).forEach(dto -> {
+                            System.out.println("Usuário : " + dto.user().toString());
+                            System.out.println("Altura do node: " + dto.height());
+
                         });
                     }
 
@@ -77,11 +81,12 @@ public class GUITerminal {
                     if (name.isEmpty()) {
                         System.out.println("Nome não pode ser vazio.");
                     } else {
-                        var users = serviceUser.getUserByName(name);
-                        if (users != null && !users.isEmpty()) {
+                        var Dto = serviceUser.getUserByName(name);
+                        if (Dto != null && !Dto.isEmpty()) {
                             System.out.println("Usuários encontrados: ");
-                            for (var user : users) {
-                                System.out.println(user.toString());
+                            for (var Dtos : Dto) {
+                                System.out.println("Usuário : " + Dtos.user().toString());
+                                System.out.println("Altura do node: " + Dtos.height());
                             }
                         } else {
                             System.out.println("Nenhum usuário encontrado com esse nome.");
